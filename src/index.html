@@ -1,17 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
-  <title>Vanilla JavaScript App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interest Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
 </head>
-
 <body>
-  <main>
-    <h1>Vanilla JavaScript App</h1>
-  </main>
-</body>
+    <div id="root"></div>
 
+    <script type="text/babel">
+        const BASE_INTEREST_RATES = [
+            { startDate: new Date('2024-07-01'), value: 3.37 },
+            { startDate: new Date('2024-01-01'), value: 3.62 },
+            { startDate: new Date('2023-07-01'), value: 3.12 },
+            { startDate: new Date('2023-01-01'), value: 1.62 },
+            { startDate: new Date('2022-07-01'), value: -0.88 },
+            { startDate: new Date('2022-01-01'), value: -0.88 },
+            { startDate: new Date('2021-07-01'), value: -0.88 },
+            { startDate: new Date('2021-01-01'), value: -0.88 },
+            { startDate: new Date('2020-07-01'), value: -0.88 },
+            { startDate: new Date('2020-01-01'), value: -0.88 },
+            { startDate: new Date('2019-07-01'), value: -0.88 },
+            { startDate: new Date('2019-01-01'), value: -0.88 },
+            { startDate: new Date('2018-07-01'), value: -0.88 },
+            { startDate: new Date('2018-01-01'), value: -0.88 },
+            { startDate: new Date('2017-07-01'), value: -0.88 },
+            { startDate: new Date('2017-01-01'), value: -0.88 },
+            { startDate: new Date('2016-07-01'), value: -0.88 },
+            { startDate: new Date('2016-01-01'), value: -0.83 },
+            { startDate: new Date('2015-07-01'), value: -0.83 },
+            { startDate: new Date('2015-01-01'), value: -0.83 },
+            { startDate: new Date('2014-07-01'), value: -0.73 },
+            { startDate: new Date('2014-01-01'), value: -0.63 },
+            { startDate: new Date('2013-07-01'), value: -0.38 },
+            { startDate: new Date('2013-01-01'), value: -0.13 },
+            { startDate: new Date('2012-07-01'), value: 0.12 },
+            { startDate: new Date('2012-01-01'), value: 0.12 },
+            { startDate: new Date('2011-07-01'), value: 0.37 },
+            { startDate: new Date('2011-01-01'), value: 0.12 },
+            { startDate: new Date('2010-07-01'), value: 0.12 },
+            { startDate: new Date('2010-01-01'), value: 0.12 },
+            { startDate: new Date('2009-07-01'), value: 0.12 },
+            { startDate: new Date('2009-01-01'), value: 1.62 },
+            { startDate: new Date('2008-07-01'), value: 3.19 },
+            { startDate: new Date('2008-01-01'), value: 3.32 },
+            { startDate: new Date('2007-07-01'), value: 3.19 },
+            { startDate: new Date('2007-01-01'), value: 2.70 },
+            { startDate: new Date('2006-07-01'), value: 1.95 },
+            { startDate: new Date('2006-01-01'), value: 1.37 },
+            { startDate: new Date('2005-07-01'), value: 1.17 },
+            { startDate: new Date('2005-01-01'), value: 1.21 },
+            { startDate: new Date('2004-07-01'), value: 1.13 },
+            { startDate: new Date('2004-01-01'), value: 1.14 },
+            { startDate: new Date('2003-07-01'), value: 1.22 },
+            { startDate: new Date('2003-01-01'), value: 1.97 },
+            { startDate: new Date('2002-07-01'), value: 2.47 },
+        ];
+
+        const InterestCalculator = () => {
+            const [amount, setAmount] = React.useState('');
+            const [startDate, setStartDate] = React.useState('');
+            const [endDate, setEndDate] = React.useState('');
+            const [interestChangeDate, setInterestChangeDate] = React.useState('2005-06-30');
+            const [result, setResult] = React.useState(null);
+
+            const calculateInterest = () => {
+                if (!amount || !startDate || !endDate) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const changeDate = new Date(interestChangeDate);
+                const value = parseFloat(amount);
+
+                let totalInterest = 0;
+                let currentDate = new Date(start);
+
+                while (currentDate < end) {
+                    const nextDate = new Date(currentDate);
+                    nextDate.setDate(nextDate.getDate() + 1);
+
+                    let rate;
+                    if (currentDate < changeDate) {
+                        rate = 0.04; // 4% before change date
+                    } else {
+                        const baseRate = BASE_INTEREST_RATES.find(r => r.startDate <= currentDate);
+                        rate = (baseRate ? baseRate.value : 0) / 100 + 0.05; // Base rate + 5%
+                    }
+
+                    const dailyInterest = (value * rate) / 365;
+                    totalInterest += dailyInterest;
+
+                    currentDate = nextDate;
+                }
+
+                setResult(totalInterest.toFixed(2));
+            };
+
+            return (
+                <div style={{
+                    maxWidth: '400px',
+                    margin: '40px auto',
+                    padding: '24px',
+                    backgroundColor: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+                }}>
+                    <h2 style={{fontSize: '24px', fontWeight: '600', color: '#333', marginBottom: '24px'}}>Interest Calculator</h2>
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
+                        <div>
+                            <label style={{display: 'block', fontSize: '14px', fontWeight: '500', color: '#666', marginBottom: '4px'}}>Amount (EUR)</label>
+                            <input
+                                type="number"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                placeholder="Enter amount"
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '6px',
+                                    fontSize: '16px'
+                                }}
+                            />
+                        </div>
+                        <div>
+                            <label style={{display: 'block', fontSize: '14px', fontWeight: '500', color: '#666', marginBottom: '4px'}}>Start Date</label>
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '6px',
+                                    fontSize: '16px'
+                                }}
+                            />
+                        </div>
+                        <div>
+                            <label style={{display: 'block', fontSize: '14px', fontWeight: '500', color: '#666', marginBottom: '4px'}}>End Date</label>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '6px',
+                                    fontSize: '16px'
+                                }}
+                            />
+                        </div>
+                        <div>
+                            <label style={{display: 'block', fontSize: '14px', fontWeight: '500', color: '#666', marginBottom: '4px'}}>Interest Change Date</label>
+                            <input
+                                type="date"
+                                value={interestChangeDate}
+                                onChange={(e) => setInterestChangeDate(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '8px',
+                                    border: '1px solid #ccc',
+                                    borderRadius: '6px',
+                                    fontSize: '16px'
+                                }}
+                            />
+                        </div>
+                        <button 
+                            onClick={calculateInterest}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                backgroundColor: '#007AFF',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontSize: '16px',
+                                fontWeight: '500',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Calculate Interest
+                        </button>
+                        {result && (
+                            <div style={{marginTop: '16px', padding: '16px', backgroundColor: '#f0f0f0', borderRadius: '6px'}}>
+                                <p style={{fontSize: '18px', fontWeight: '600'}}>Total Interest: €{result}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<InterestCalculator />, document.getElementById('root'));
+    </script>
+</body>
 </html>
